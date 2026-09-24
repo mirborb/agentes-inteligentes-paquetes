@@ -39,37 +39,77 @@ string tipoCelda(char c)
     return "Desconocido";
 }
 
+// Esta funcion evita que el agente se salga del arreglo (tablero)
+bool esValida(int fila, int col) 
+{
+    return (fila >= 0 && fila < FILAS && col >= 0 && col < COLUMNAS);
+}
 
-//Su función será obtener la información disponible
-//mediante los sensores. QUE VEO 
+
+// El agente revisa las 4 celdas de alrededor, si esta en el borde pone "Fuera"
 void percibir(const vector<vector<char>>& entorno, Percepcion& p, const Posicion& agente)
 {
 p.celdaActual = tipoCelda(entorno[agente.fila][agente.col]);
-p.arriba = tipoCelda(entorno[agente.fila - 1][agente.col]);
-p.abajo = tipoCelda(entorno[agente.fila + 1][agente.col]);
-p.izquierda = tipoCelda(entorno[agente.fila][agente.col -1]);
-p.derecha = tipoCelda(entorno[agente.fila][agente.col + 1]);
+
+if (esValida(agente.fila - 1, agente.col)) 
+{
+    p.arriba = tipoCelda(entorno[agente.fila - 1][agente.col]);
+} else 
+{
+    p.arriba = "Fuera";
 }
 
-//Esta función representará la lógica que utiliza el agente
-//para seleccionar una acción. A DONDE PUEDO IR 
-//string decidir (const vector<vector<char>> const Percepcion& p )
-//{
-  //  if (p.arriba == "Paquete") return "arriba";
-    //else if (p.abajo == "Paquete") return "abajo";
-    //else if (p.izquierda == "Paquete") return "izquierda";
-    //else if (p.derecha == "Paquete") return "derecha";
+if (esValida(agente.fila + 1, agente.col)) 
+{
+    p.abajo = tipoCelda(entorno[agente.fila + 1][agente.col]);
+} else 
+{
+    p.abajo = "Fuera";
+}
 
-   // vector<string> seguras;
-//if (p.arriba == "Vacia") seguras.push_back("arriba");
-//if (p.abajo == "Vacia") seguras.push_back("abajo");
-//if (p.izquierda == "Vacia") seguras.push_back("izquierda");
-//if (p.derecha == "Vacia") seguras.push_back("derecha");   
+if (esValida(agente.fila, agente.col - 1)) 
+{
+    p.izquierda = tipoCelda(entorno[agente.fila][agente.col - 1]);
+} else 
+{
+    p.izquierda = "Fuera";
+}
 
-//if (seguras.empty()) return "NINGUNA, ACABO.";
+if (esValida(agente.fila, agente.col + 1)) 
+{
+    p.derecha = tipoCelda(entorno[agente.fila][agente.col + 1]);
+} else 
+{
+    p.derecha = "Fuera";
+}
 
-//return seguras[rand() % seguras.size()];
-//}
+}
+
+
+// El agente decide para donde moverse, primero busca paquetes cercas y si no hay
+void decidir(const Percepcion& p, string& accion)
+{
+    if (p.arriba == "Paquete") accion = "arriba";
+    else if (p.abajo == "Paquete") accion = "abajo";
+    else if (p.izquierda == "Paquete") accion = "izquierda";
+    else if (p.derecha == "Paquete") accion = "derecha";
+    else 
+    {
+        vector<string> seguras;
+        if (p.arriba == "Vacia") seguras.push_back("arriba");
+        if (p.abajo == "Vacia") seguras.push_back("abajo");
+        if (p.izquierda == "Vacia") seguras.push_back("izquierda");
+        if (p.derecha == "Vacia") seguras.push_back("derecha");   
+        if (!seguras.empty()) 
+        {
+            accion = seguras[rand() % seguras.size()];
+        } 
+        else 
+        {
+            accion = "NINGUNA, ACABO.";
+        }
+    }
+}
 
 //Será responsable de modificar el entorno o la posición del
 //agente. ME MUEVO Y ACTUALIZO EL MUNDO
@@ -139,23 +179,24 @@ srand(time(0));
     Posicion agente = {2, 0};
 
 
-    ///INICIO SEGUIR 
-//while ( hayPaquetes(entorno) && movimientos < MAX_PASOS) 
-//{
-  //  Percepcion p;
-   // percibir(entorno, p, agente);
+///INICIO SEGUIR 
+while (hayPaquetes(entorno) && agente.movimientos < agente.MAX_PASOS) 
+{
+    Percepcion p;
+    percibir(entorno, p, agente);
 
-    //percibir(entorno, p, agente);
+    string accion;
+    decidir(p, accion);
 
-//string accion = decidir( entorno, p, agente);
+    if (accion == "NINGUNA, ACABO.") 
+    {
+        break;
+    }
 
-//Actuar(entorno, agente, accion, puntuacion, paquetesDisponibles);
+    Actuar(entorno, agente, accion, puntuacion, paquetesDisponibles);
 
-//mostrar = mostrarEntorno(entorno, agente);
-
-
-
-//}
+    mostrarEntorno(entorno, agente);
+}
 
     return 0;
 }
